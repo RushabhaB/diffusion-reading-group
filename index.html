@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diffusion Models & Flow Matching Reading Group</title>
+    <style>
+        :root {
+            --ucla-blue: #2774AE;
+            --ucla-gold: #FFD100;
+            --ucla-dark: #003B5C;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-light: #5a6c7d;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--ucla-dark) 0%, var(--ucla-blue) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .ucla-badge {
+            display: inline-block;
+            margin-top: 1rem;
+            background: rgba(255, 209, 0, 0.15);
+            border: 1px solid var(--ucla-gold);
+            color: var(--ucla-gold);
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main content */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        section h2 {
+            font-size: 1.4rem;
+            color: var(--ucla-dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--ucla-gold);
+            display: inline-block;
+        }
+
+        section p {
+            color: var(--text-light);
+            margin-bottom: 0.8rem;
+        }
+
+        /* Info grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            background: var(--bg);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--ucla-blue);
+        }
+
+        .info-item .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ucla-blue);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-item .value {
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Schedule table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        thead th {
+            background: var(--ucla-dark);
+            color: white;
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        thead th:first-child { border-radius: 6px 0 0 0; }
+        thead th:last-child { border-radius: 0 6px 0 0; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover { background: #f0f7ff; }
+
+        tbody td {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        tbody td:first-child {
+            font-weight: 600;
+            color: var(--ucla-blue);
+            white-space: nowrap;
+        }
+
+        .week-num {
+            display: inline-block;
+            background: var(--ucla-blue);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            font-weight: 700;
+        }
+
+        /* Links */
+        a {
+            color: var(--ucla-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover { text-decoration: underline; }
+
+        /* Resources list */
+        .resource-list {
+            list-style: none;
+            margin-top: 0.8rem;
+        }
+
+        .resource-list li {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .resource-list li:last-child { border-bottom: none; }
+
+        .resource-list li::before {
+            content: "\2192";
+            color: var(--ucla-blue);
+            font-weight: bold;
+        }
+
+        /* Contact */
+        .contact-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4f8 100%);
+            border: 1px solid var(--ucla-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .contact-box a {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.6rem; }
+            header .subtitle { font-size: 1rem; }
+            section { padding: 1.2rem; }
+            .info-grid { grid-template-columns: 1fr; }
+            table { font-size: 0.85rem; }
+            tbody td, thead th { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Diffusion Models &amp; Flow Matching</h1>
+    <div class="subtitle">Reading Group &mdash; Winter/Spring 2026</div>
+    <div class="ucla-badge">UCLA ECE Department</div>
+</header>
+
+<div class="container">
+
+    <!-- About -->
+    <section>
+        <h2>About</h2>
+        <p>
+            This reading group is focused on building a <strong>fundamental understanding of diffusion models</strong>.
+            We will work through the core theory from the ground up, so a <strong>basic understanding of probability theory
+            is expected</strong> as a prerequisite.
+        </p>
+        <p>
+            The group is geared towards <strong>graduate students</strong> who either aim to apply diffusion models
+            in their own domain research or are interested in working on diffusion models directly.
+            Whether you're looking to leverage these techniques for your specific application area or
+            contribute to advancing the field itself, this reading group is for you.
+        </p>
+    </section>
+
+    <!-- Logistics -->
+    <section>
+        <h2>Logistics</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="label">When</div>
+                <div class="value">Wednesdays, 5:00 &ndash; 6:00 PM</div>
+            </div>
+            <div class="info-item">
+                <div class="label">Where</div>
+                <div class="value">Maxwell Room, Engineering Building Unit IV (EBU IV)</div>
+            </div>
+            <div class="info-item">
+                <div class="label">Level</div>
+                <div class="value">Graduate</div>
+            </div>
+            <div class="info-item">
+                <div class="label">Department</div>
+                <div class="value">UCLA Electrical &amp; Computer Engineering</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Schedule -->
+    <section>
+        <h2>Schedule</h2>
+        <p>All sessions are <strong>Wednesdays, 5:00 &ndash; 6:00 PM</strong> in Maxwell Room, EBU IV.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Date</th>
+                    <th>Topic</th>
+                    <th>Reading</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="week-num">1</span></td>
+                    <td>Feb 11</td>
+                    <td>Introduction &amp; Denoising Diffusion Probabilistic Models</td>
+                    <td><a href="https://arxiv.org/abs/2006.11239" target="_blank">Ho et al., 2020</a></td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">2</span></td>
+                    <td>Feb 18</td>
+                    <td>Score-Based Generative Models</td>
+                    <td>TBD</td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">3</span></td>
+                    <td>Feb 25</td>
+                    <td>Flow &amp; Diffusion Model Fundamentals</td>
+                    <td><a href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank">Lecture 1 Notes</a></td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">4</span></td>
+                    <td>Mar 4</td>
+                    <td>Flow Matching Techniques</td>
+                    <td><a href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank">Lecture 2 Notes</a></td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">5</span></td>
+                    <td>Mar 11</td>
+                    <td>Score Matching &amp; Guidance Methods</td>
+                    <td><a href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank">Lecture 3 Notes</a></td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">6</span></td>
+                    <td>Mar 18</td>
+                    <td>SDEs &amp; the Fokker-Planck Equation</td>
+                    <td>TBD</td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">7</span></td>
+                    <td>Mar 25</td>
+                    <td>Latent Spaces &amp; Neural Network Architectures</td>
+                    <td><a href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank">Lecture 4 Notes</a></td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">8</span></td>
+                    <td>Apr 1</td>
+                    <td>Discrete Diffusion Models</td>
+                    <td><a href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank">Lecture 5 Notes</a></td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">9</span></td>
+                    <td>Apr 8</td>
+                    <td>Advanced Topics &amp; Recent Developments</td>
+                    <td>TBD</td>
+                </tr>
+                <tr>
+                    <td><span class="week-num">10</span></td>
+                    <td>Apr 15</td>
+                    <td>Applications to Domain Research &amp; Open Discussion</td>
+                    <td>&mdash;</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Resources -->
+    <section>
+        <h2>Resources</h2>
+        <p>
+            We will generally follow the fundamentals outlined in MIT's course, supplemented with papers
+            suggested by group members.
+        </p>
+        <ul class="resource-list">
+            <li>
+                <a href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank">MIT 6.S184: Flow Matching and Diffusion Models</a>
+                &mdash; primary reference for fundamentals and structure
+            </li>
+            <li>
+                <a href="https://arxiv.org/abs/2006.11239" target="_blank">Denoising Diffusion Probabilistic Models</a>
+                (Ho, Jain &amp; Abbeel, 2020) &mdash; foundational DDPM paper (first session reading)
+            </li>
+            <li>
+                Additional papers suggested by members throughout the quarter
+            </li>
+        </ul>
+    </section>
+
+    <!-- Contact -->
+    <section>
+        <h2>Join Us</h2>
+        <p>
+            If you are interested in being part of this reading group, please reach out!
+        </p>
+        <div class="contact-box">
+            <p>Email us at</p>
+            <a href="mailto:rubalaji99@g.ucla.edu">rubalaji99@g.ucla.edu</a>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    UCLA ECE Department &bull; Diffusion Models &amp; Flow Matching Reading Group &bull; 2026
+</footer>
+
+</body>
+</html>
